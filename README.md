@@ -17,16 +17,16 @@ package containing the metadata and the actual PDF document, a multipart/form-da
 required to store the documents. The current implementation does not allow for an existing document with
 the same ID to be updated or replaced.
 
-URL
+**URL**
 ```
 /api/v1/document/:tenant/:type/:id
 ```
 
-Method
+**Method**
 ```
 PUT
 ```
-URL Parameters
+**URL Parameters**
 
 | Name | Type | Required | Default | Description |
 |------|------|----------|---------|-------------|
@@ -34,7 +34,7 @@ URL Parameters
 | id | string | Yes | | ID of the document to store |
 | type | string | | notice | notice Document type (notice or issue) |
 
-Data Parameters
+**Data Parameters**
 
 | Name | Type | Required | Default | Description |
 |---|---|---|---|---|
@@ -55,4 +55,29 @@ converted to the full format. If the time zone is omitted, CET/CEST time zone is
 ```
 publicationTime YYYY-MM-DDT00:00:00.000
 publicUntil YYYY-MM-DDT23:59:59.999
+```
+
+**Request Example**
+
+The following example describes a complete request body using the parameters previously explained 
+for an initial search query: 
+The following example describes storing a notice document into the archive:
+
+HTTP
+```
+PUT /api/v1/document/shab/1234567 
+```
+JSON
+```
+{ "cantons" : [ "zh" ], 
+ "heading" : "hr", 
+ "subheading" : "hr01", 
+ "submitter" : "Example submitter", 
+ "language" : "de", 
+ "issue" : 1, 
+ "title" : "Example notice title", 
+ "notice" : "Example notice text...", 
+ "publicationTime" : "2017-01-01", 
+ "publicUntil" : "2019-12-31" 
+}
 ```
