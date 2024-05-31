@@ -81,3 +81,18 @@ JSON
  "publicUntil" : "2019-12-31" 
 }
 ```
+
+The following example describes storing an issue document into the archive: 
+
+HTTP 
+```
+PUT /api/v1/document/shab/issue/2017-01-03
+```
+JSON
+```
+{ "language" : "de", 
+ "issue" : 1, 
+ "publicationTime" : "2017-01-01", 
+ "publicUntil" : "2019-12-31", 
+}
+```
