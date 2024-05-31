@@ -63,11 +63,13 @@ The following example describes a complete request body using the parameters pre
 for an initial search query: 
 The following example describes storing a notice document into the archive:
 
-HTTP
+
+> HTTP
 ```
 PUT /api/v1/document/shab/1234567 
 ```
-JSON
+
+> JSON
 ```
 { "cantons" : [ "zh" ], 
  "heading" : "hr", 
@@ -84,11 +86,13 @@ JSON
 
 The following example describes storing an issue document into the archive: 
 
-HTTP 
+
+> HTTP 
 ```
 PUT /api/v1/document/shab/issue/2017-01-03
 ```
-JSON
+
+> JSON
 ```
 { "language" : "de", 
  "issue" : 1, 
@@ -96,3 +100,247 @@ JSON
  "publicUntil" : "2019-12-31", 
 }
 ```
+
+The requests needs to be sent as an multipart/form-data with the first content being the JSON 
+object similar to the one shown above using the content type application/json encoded in UTF8. 
+The second content needs to be the PDF document itself using the content type application/pdf. 
+
+> CURL
+```
+curl –X PUT -H 'Content-Type: multipart/form-data' –F 'data={"canton":"zh", 
+ "heading":"hr","issue":1,"language":"de","notice":"Example notice text...", 
+ "publicationTime":"2017-01-03","subheading":"HR01","submitter":"Example submitter", 
+ "title":"Example notice title"};type=application/json' \ 
+–F 'pdf=@file;type=application/pdf' \ 
+http://archive/api/v1/document/shab/1234567
+```
+
+> CURL 
+```
+curl –X PUT -H 'Content-Type: multipart/form-data' –F 'data={ "issue":1, 
+ "language":"de","publicationTime":"2017-01-03"};type=application/json' \ 
+–F 'pdf=@file;type=application/pdf' \ 
+https://archive:8443/api/v1/document/shab/issue/2017-01-03
+```
+
+**Success Response**
+
+Code: 201 
+
+> JSON 
+```
+{ "message" : "Document 1234567 successfully stored" } 
+```
+
+**Error Response** 
+Standard HTTP error codes are used to describe errors. The body will contain an error description 
+object if possible.
+
+Code: 4xx / 5xx
+
+The following example describes an error if a document with the same ID already exists: 
+Code: 405 
+> JSON 
+```
+{ "error" : "Document 1234567 already exists" }
+```
+
+The following example describes an error if a semantically error has been found in the request: 
+Code: 422 
+
+>JSON 
+```
+{ "error" : "Unknown field: missingField" }
+```
+The following example describes an error if the required PDF data is not contained in the request: 
+Code: 422 
+
+>JSON
+```
+{ "error" : "Document 1234567 has no PDF attached" }
+```
+
+### Query
+There are two main query requests available. Either to fetch a known document by specifying its ID or to 
+get a list of documents matching a specified search expression. Both queries are available for internal 
+usage and for public usage trough a dedicated URL path. The public queries are limited by restrictions 
+which disallows searching or fetching documents which are not public anymore (publicUntil is lower 
+than now). 
+
+**Document**
+The document query enables the retrieval of a specific document from the archive either as a JSON object 
+which also contains details of the archiving process and signature or as a PDF. 
+
+**URL**
+
+For public queries with forced restrictions: 
+
+```
+/api/v1/public/document/:tenant/:type/:id 
+/api/v1/public/document/:tenant/:type/:id.pdf 
+/api/v1/public/document/:tenant/issue/:year/:issue 
+/api/v1/public/document/:tenant/issue/:year/:issue.pdf 
+/api/v1/public/document/:tenant/issue/latest 
+/api/v1/public/document/:tenant/issue/latest.pdf
+```
+For internal queries without restrictions: 
+```
+/api/v1/document/:tenant/:type/:id 
+/api/v1/document/:tenant/:type/:id.pdf 
+/api/v1/document/:tenant/issue/:year/:issue 
+/api/v1/document/:tenant/issue/:year/:issue.pdf 
+/api/v1/document/:tenant/issue/latest 
+/api/v1/document/:tenant/issue/latest.pdf
+```
+
+**Method**
+GET 
+
+**URL Parameters** 
+
+| Name | Type | Required | Default | Description |
+|------|------|----------|---------|-------------|
+| tenant | string | Yes | | Tenant to retrieve document from |
+| type | string | | notice | notice Document type (notice or issue) |
+| id | string | Yes | | ID of the document to store |
+| year | string | Year of published issue |
+| issue | string | Issue | number of published issue | 
+
+
+**Data Parameters** 
+
+None. 
+
+**Request Example** 
+
+The following example describes fetching the document as a JSON object: 
+
+>HTTP
+```
+GET /api/v1/document/shab/XX-YY01-0123456789 
+GET /api/v1/document/shab/notice/1234567 
+GET /api/v1/document/kabzh/issue/2017-01-06
+GET /api/v1/document/kabzh/issue/2017/13 
+GET /api/v1/document/kabzh/issue/latest 
+```
+
+>CURL
+```
+curl http://archive/api/v1/document/shab/XX-YY01-0123456789 
+curl http://archive/api/v1/document/shab/notice/1234567 
+curl http://archive/api/v1/document/kabzh/issue/2017-01-06 
+curl http://archive/api/v1/document/kabzh/issue/2017/13 
+curl http://archive/api/v1/document/kabzh/issue/latest
+```
+
+The following example describes fetching the document as a PDF: 
+
+>HTTP
+```
+GET /api/v1/document/shab/XX-YY01-0123456789.pdf 
+GET /api/v1/document/shab/notice/1234567.pdf 
+GET /api/v1/document/kabzh/issue/2017-01-06.pdf 
+GET /api/v1/document/kabzh/issue/2017/13.pdf 
+GET /api/v1/document/kabzh/issue/latest.pdf
+```
+
+>CURL
+``` 
+curl -O http://archive/api/v1/document/shab/XX-YY01-0123456789.pdf 
+curl –O http://archive/api/v1/document/shab/notice/1234567.pdf 
+curl –O http://archive/api/v1/document/kabzh/issue/2017-01-06.pdf 
+curl –O http://archive/api/v1/document/kabzh/issue/2017/13.pdf 
+curl –O http://archive/api/v1/document/kabzh/issue/latest.pdf
+```
+**Success Response**
+
+Only the structure of a request to a document as a JSON object is described here because requesting 
+a PDF will return a PDF document in the body of the response: 
+
+Code: 200 
+
+When requesting a notice: 
+
+>JSON 
+```
+{ "id" : "1234567", 
+ "tenants" : [ "shab" ], 
+ "cantons" : [ "zh" ], 
+ "heading" : "hr", 
+ "subheading" : "hr01", 
+ "submitter" : "Example submitter", 
+ "language" : "de", 
+ "issue" : 1, 
+ "title" : "Example notice title", 
+ "notice" : "Example notice text...", 
+ "publicationTime" : "2017-01-03T01:00:00.000Z", 
+ "publicUntil" : "2020-01-02T22:59:59.999Z", 
+ "archiveTime" : "2017-01-03T15:22:21.421Z" 
+}
+```
+When requesting an issue: 
+
+>JSON
+```
+{ "id" : "2017-01-06", 
+ "tenants" : [ "shab" ], 
+ "language" : "de", 
+ "issue" : 1, 
+ "publicationTime" : "2017-01-06T01:00:00.000Z",
+ "publicUntil" : "2020-01-05T22:59:59.999Z",
+ "archiveTime" : "2017-01-07T15:22:21.421Z" 
+}
+```
+
+**Error Response**
+
+Standard HTTP error codes are used to describe errors. The body will contain an error description 
+object if possible.
+
+Code: 4xx / 5xx
+
+The following example describes an error if the requested document cannot be found:
+
+Code: 404
+
+>JSON
+```
+{ "error" : "Document with ID 1234567 not found" } 
+{ "error" : "Tenant with name unknown not found" } 
+```
+**Search** 
+The search query can be used to search through the archive using simple GET requests. 
+
+**URL** 
+For public queries with forced restrictions:
+
+```
+/api/v1/public/search/:tenant/:type 
+/api/v1/public/search/:tenant/:type?parameter=value 
+For internal queries without restrictions: 
+/api/v1/search/:tenant/:type 
+/api/v1/search/:tenant/:type?parameter=value
+```
+
+**Method** 
+
+GET 
+
+**URL Parameters**
+| Name | Type | Default | Description |
+|------|------|---------|-------------|
+| canton | string || Comma separated list and/or multiple occurrences |
+| heading | string || Comma separated list and/or multiple occurrences |
+| id | string || Exact match of the notice id (case insensitive) |
+| notice | string || Full text search of the notice title and content |
+| page | integer | 1 | The result page number to be fetched |
+| pagesize | integer | 10 | The number of results per page to be fetched |
+| publicationTime | date || The publication date and time in ISO 8601 format |
+| publicationTime.from | date || The publication date and time in ISO 8601 format (beginning of range) |
+| publicationTime.to | date | | The publication date and time in ISO 8601 format (end of range) |
+| subheading | string || Comma separated list and/or multiple occurrences
+| submitter | string || Full text search of the submitter | 
+| tenant | string || Tenant to search documents in |
+| title | string || The title of the document to search for |
+| type | string || notice Document type to search for (notice or issue) |
+
