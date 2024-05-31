@@ -342,5 +342,174 @@ GET
 | submitter | string || Full text search of the submitter | 
 | tenant | string || Tenant to search documents in |
 | title | string || The title of the document to search for |
-| type | string || notice Document type to search for (notice or issue) |
+| type | string || notice | Document type to search for (notice or issue) |
 
+
+canton, heading and subheading can be specified multiple times or they can contain multiple values using a comma separated list (combination of both is also possible). A document needs to match one of canton and either one of heading or subheading (if specified) as well as all other specified criteria to be found. 
+publicationTime and publicationTime.from/publicationTime.to are mutually exclusive. 
+The date only form of the ISO 8601 date and time format is allowed (YYYY-MM-DD) and will be converted to the full format. If the time zone is omitted, CET/CEST time zone is used: 
+
+```
+publicationTime YYYY-MM-DDT00:00:00.000 YYYY-MM-DDT23:59:59.999 
+publicationTime.from YYYY-MM-DDT00:00:00.000 
+publicationTime.to YYYY-MM-DDT23:59:59.999
+```
+
+**Data Parameters**
+
+None. 
+
+**Request Example**
+
+The following example describes the GET based search:
+
+>CURL
+```
+curl http://archive/api/v1/search/shab?heading=hr&canton=be,zh&publicationTime.from= 
+ 2017-01-01&publicationTime.to=2017-01-31
+```
+**Success Response**
+
+The following example describes a successful response to a search request. 
+
+Code: 200 
+
+When searching for notices: 
+
+>JSON
+```
+{ "type" : "notice", 
+ "page" : 1, 
+ "pageCount" : 983, 
+ "resultCount" : 9821, 
+ "results" : [ 
+ { "id" : "1234567", 
+ "tenants" : [ "shab" ], 
+ "heading" : "hr", 
+ "subheading" : "hr01", 
+ "submitter" : "EHRA-Import User", 
+ "title" : "Example AG, Zürich", 
+ "publicationTime" : "2017-01-03T01:00:00.000" 
+ }, 
+ { "id" : "1234566", 
+ "tenants" : [ "shab" ], 
+ "heading" : "hr", 
+ "subheading" : "hr01", 
+ "submitter" : "EHRA-Import User", 
+ "title" : "Example GmbH, Bern", 
+ "publicationTime" : "2017-01-03T01:00:00.000" 
+ }, 
+ …snip…
+ ] 
+}
+```
+
+When searching for issues: 
+
+>JSON
+```
+{ "type" : "issue" 
+ "page" : 1, 
+ "pageCount" : 2, 
+ "resultCount" : 12, 
+ "results" : [ 
+ { "tenants" : [ "shab" ], 
+ "id" : "2017-01-03", 
+ "publicationTime" : "2017-01-03T01:00:00.000" 
+ }, 
+ { "tenants" : [ "kabzh" ], 
+ "id" : "2017-01-06", 
+ "publicationTime" : "2017-01-06T01:00:00.000" 
+ }, 
+ …snip…
+ ] 
+}
+```
+
+If no results are found, the response will still be marked as a success but with an empty result set: 
+
+>JSON
+```
+{ "type" : "notice" 
+ "page" : 0, 
+ "pageCount" : 0, 
+ "resultCount" : 0, 
+ "results" : [] 
+}
+```
+
+**Error Response**
+
+Standard HTTP error codes are used to describe errors. The body will contain an error description object if possible.
+
+Code: 4xx / 5xx
+
+The following example describes an error if a semantically error has been found in the request: 
+
+Code: 422 
+
+>JSON
+```
+{ "error" : "Unknown field: missingField" }
+```
+
+### Admin 
+The admin namespace provides functionality for administration and internal functions. 
+
+**Ping** 
+The ping request is intended to be used by load balancers and monitoring tools for a quick health check. 
+
+**URL** 
+
+/api/v1/admin/ping 
+
+**Method** 
+
+GET 
+
+**URL Parameters** 
+
+None. 
+
+**Data Parameters**
+
+None.
+
+**Request Example**
+
+The following example describes executing a ping: 
+
+>HTTP
+```
+GET /api/v1/admin/ping
+```
+ 
+>CURL
+``` 
+curl http://archive/api/v1/admin/ping
+```
+
+**Success Response**
+
+Code: 200 
+
+>JSON 
+
+```
+{ "ping" : "pong" }
+```
+
+**Error Response**
+
+Standard HTTP error codes are used to describe errors. The body will contain an error description object if possible. 
+
+Code: 4xx / 5xx
+
+The following example describes an error if a document with the same ID already exists:
+
+Code: 500 
+
+>JSON
+```
+{ "error" : "The system is currently unavailable" }
+```
