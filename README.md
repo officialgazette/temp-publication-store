@@ -1,9 +1,10 @@
-# Overview
+## Purpose of the Archive
 > [!IMPORTANT]
 > The term "archive" is not used consistently in the context of the official gazette portal. In the given context, "archive" is to be considered a **temporary file repository** rather than a long-term archive with a legally binding character. The term is to be distinguished from the archives of the respective publishers of official gazettes. These can obtain publications via API compliant with the [SIP standard](https://www.ech.ch/de/ech/ech-0160/1.0)
 
-## Purpose of the Archive
-xxx
+This source code is part of the existing official gazette portal solution. However, it is an autonomous component that can be integrated using the API described below.
+The component persists PDF files and ensures that they can be found in accordance with their legal requirements. The indexing of the documents is based on a set of general metadata.
+
 
 ## API
 The API to access the SHAB archiving system is implemented using HTTP based REST. If not otherwise
