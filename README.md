@@ -1,4 +1,4 @@
-## Purpose of the Archive
+## Purpose of the temporary publication store
 > [!IMPORTANT]
 > The term "archive" is not used consistently in the context of the official gazette portal. In the given context, "archive" is to be considered a **temporary file repository** rather than a long-term archive with a legally binding character. The term is to be distinguished from the archives of the respective publishers of official gazettes. These can obtain publications via API compliant with the [SIP standard](https://www.ech.ch/de/ech/ech-0160/1.0)
 
